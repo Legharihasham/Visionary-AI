@@ -1,0 +1,10 @@
+
+{
+  "name": "Visionary AI - Real-time Screen Assistant",
+  "description": "A cutting-edge React application that leverages Gemini 2.5 Flash Native Audio for real-time screen analysis and voice-driven interactions. Ask questions about your screen, and get natural voice guidance.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "display-capture"
+  ]
+}
