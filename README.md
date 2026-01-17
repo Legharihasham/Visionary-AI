@@ -35,7 +35,7 @@ After cloning the repository:
 
 3. **Start the Application**:
    ```bash
-   npm run dev
+   npm start
    ```
 
 4. **Access the App**:
