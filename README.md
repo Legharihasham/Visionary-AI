@@ -61,6 +61,3 @@ After cloning the repository:
 - **Screen Capture**: Uses the `navigator.mediaDevices.getDisplayMedia` API. Frames are captured at 1 frame per second to ensure low latency while providing enough visual context for reasoning.
 - **Audio Processing**: Raw PCM data (16kHz in, 24kHz out) is streamed via WebSockets using the Gemini Live protocol.
 - **Multimodal AI**: Uses `gemini-2.5-flash-native-audio-preview-12-2025` which is specifically optimized for low-latency voice and vision tasks.
-
-## Why no Python/pyautogui?
-The original request mentioned `pyautogui`. As a web application, this implementation uses the native Web MediaDevices API (`getDisplayMedia`) which provides the same screen-viewing capability without requiring a Python installation or desktop-level system hooks, making it more accessible and secure within a browser environment.
