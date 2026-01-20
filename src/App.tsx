@@ -1,13 +1,14 @@
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { ConnectionStatus, TranscriptionLine } from './types';
-import {
-  decode,
-  encode,
-  decodeAudioData,
-  createAudioBlob,
-  blobToBase64
+import { 
+  decode, 
+  encode, 
+  decodeAudioData, 
+  createAudioBlob, 
+  blobToBase64 
 } from './utils/audioUtils';
 
 const SAMPLE_RATE_IN = 16000;
@@ -19,7 +20,7 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
   const [transcriptions, setTranscriptions] = useState<TranscriptionLine[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  
   // Refs for audio/video stream handling
   const screenVideoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -37,7 +38,7 @@ const App: React.FC = () => {
   const stopAll = useCallback(() => {
     if (frameIntervalRef.current) window.clearInterval(frameIntervalRef.current);
     if (sessionRef.current) sessionRef.current.close();
-
+    
     activeSourcesRef.current.forEach(source => source.stop());
     activeSourcesRef.current.clear();
 
@@ -88,12 +89,12 @@ const App: React.FC = () => {
           onopen: () => {
             console.log('Gemini Live Connection Opened');
             setStatus(ConnectionStatus.CONNECTED);
-
+            
             // Start streaming microphone
             navigator.mediaDevices.getUserMedia({ audio: true }).then(micStream => {
               const source = inputAudioCtxRef.current!.createMediaStreamSource(micStream);
               const processor = inputAudioCtxRef.current!.createScriptProcessor(4096, 1, 1);
-
+              
               processor.onaudioprocess = (e) => {
                 const inputData = e.inputBuffer.getChannelData(0);
                 const pcmBlob = createAudioBlob(inputData);
@@ -116,7 +117,7 @@ const App: React.FC = () => {
                   canvas.width = video.videoWidth;
                   canvas.height = video.videoHeight;
                   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+                  
                   canvas.toBlob(async (blob) => {
                     if (blob) {
                       const base64Data = await blobToBase64(blob);
@@ -158,12 +159,12 @@ const App: React.FC = () => {
             if (base64Audio && outputAudioCtxRef.current) {
               const ctx = outputAudioCtxRef.current;
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, ctx.currentTime);
-
+              
               const audioBuffer = await decodeAudioData(decode(base64Audio), ctx, SAMPLE_RATE_OUT, 1);
               const source = ctx.createBufferSource();
               source.buffer = audioBuffer;
               source.connect(ctx.destination);
-
+              
               source.onended = () => {
                 activeSourcesRef.current.delete(source);
               };
@@ -201,14 +202,15 @@ const App: React.FC = () => {
   };
 
   return (
+    <>
     <div className="flex flex-col h-screen max-w-7xl mx-auto p-4 md:p-8 space-y-6">
-      <SpeedInsights />
+      <Analytics />
       <header className="flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-xl">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/20">
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-...[...]}
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-[...]}" />
             </svg>
           </div>
           <div>
@@ -218,7 +220,7 @@ const App: React.FC = () => {
             <p className="text-sm text-gray-400">Real-time Multimodal Screen Assistant</p>
           </div>
         </div>
-
+        
         <div className="flex items-center gap-4">
           {status === ConnectionStatus.DISCONNECTED && (
             <button
@@ -272,10 +274,10 @@ const App: React.FC = () => {
             <div className="text-xs text-gray-500 uppercase tracking-widest font-bold">1 FPS Analysis</div>
           </div>
           <div className="flex-1 bg-black flex items-center justify-center relative">
-            <video
-              ref={screenVideoRef}
-              autoPlay
-              muted
+            <video 
+              ref={screenVideoRef} 
+              autoPlay 
+              muted 
               className={`w-full h-full object-contain ${status !== ConnectionStatus.CONNECTED && 'hidden'}`}
             />
             {status !== ConnectionStatus.CONNECTED && (
@@ -286,7 +288,7 @@ const App: React.FC = () => {
                 <p className="text-lg">Waiting for screen capture...</p>
               </div>
             )}
-
+            
             {/* Visual indicator for voice activity */}
             {status === ConnectionStatus.CONNECTED && (
               <div className="absolute bottom-6 right-6 z-10">
@@ -320,15 +322,16 @@ const App: React.FC = () => {
               </div>
             ) : (
               transcriptions.map((t, idx) => (
-                <div
-                  key={idx}
+                <div 
+                  key={idx} 
                   className={`flex flex-col ${t.type === 'user' ? 'items-end' : 'items-start'} animate-in fade-in zoom-in-95 duration-300`}
                 >
-                  <div
-                    className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${t.type === 'user'
-                      ? 'bg-blue-600 text-white rounded-br-none'
-                      : 'bg-gray-800 text-gray-200 rounded-bl-none'
-                      }`}
+                  <div 
+                    className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${
+                      t.type === 'user' 
+                        ? 'bg-blue-600 text-white rounded-br-none' 
+                        : 'bg-gray-800 text-gray-200 rounded-bl-none'
+                    }`}
                   >
                     {t.text}
                   </div>
@@ -340,10 +343,10 @@ const App: React.FC = () => {
             )}
           </div>
           <div className="p-4 bg-gray-900/80 border-t border-gray-800">
-            <div className="flex items-center gap-3 text-sm text-gray-400">
-              <div className={`w-2 h-2 rounded-full ${status === ConnectionStatus.CONNECTED ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span>{status === ConnectionStatus.CONNECTED ? 'Listening to voice & screen...' : 'System offline'}</span>
-            </div>
+             <div className="flex items-center gap-3 text-sm text-gray-400">
+                <div className={`w-2 h-2 rounded-full ${status === ConnectionStatus.CONNECTED ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span>{status === ConnectionStatus.CONNECTED ? 'Listening to voice & screen...' : 'System offline'}</span>
+             </div>
           </div>
         </div>
       </main>
@@ -363,7 +366,7 @@ const App: React.FC = () => {
         <div className="bg-gray-900/40 p-4 rounded-xl border border-gray-800/50 flex items-center gap-4">
           <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.7" />
             </svg>
           </div>
           <div className="text-xs">
@@ -374,7 +377,7 @@ const App: React.FC = () => {
         <div className="bg-gray-900/40 p-4 rounded-xl border border-gray-800/50 flex items-center gap-4">
           <div className="p-2 bg-green-500/10 rounded-lg text-green-400">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591  ..." />
             </svg>
           </div>
           <div className="text-xs">
@@ -384,6 +387,8 @@ const App: React.FC = () => {
         </div>
       </footer>
     </div>
+    <SpeedInsights />
+    </>
   );
 };
 
