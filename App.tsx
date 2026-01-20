@@ -1,4 +1,4 @@
-
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { ConnectionStatus, TranscriptionLine } from './types';
