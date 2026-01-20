@@ -1,4 +1,4 @@
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
@@ -202,6 +202,7 @@ const App: React.FC = () => {
   };
 
   return (
+    <>
     <div className="flex flex-col h-screen max-w-7xl mx-auto p-4 md:p-8 space-y-6">
       <Analytics />
       <header className="flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-xl">
@@ -209,7 +210,7 @@ const App: React.FC = () => {
           <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/20">
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-...[...]}
             </svg>
           </div>
           <div>
@@ -282,7 +283,7 @@ const App: React.FC = () => {
             {status !== ConnectionStatus.CONNECTED && (
               <div className="flex flex-col items-center gap-4 text-gray-600">
                 <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 01-2-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <p className="text-lg">Waiting for screen capture...</p>
               </div>
@@ -326,67 +327,5 @@ const App: React.FC = () => {
                   className={`flex flex-col ${t.type === 'user' ? 'items-end' : 'items-start'} animate-in fade-in zoom-in-95 duration-300`}
                 >
                   <div 
-                    className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${
-                      t.type === 'user' 
-                        ? 'bg-blue-600 text-white rounded-br-none' 
-                        : 'bg-gray-800 text-gray-200 rounded-bl-none'
-                    }`}
-                  >
-                    {t.text}
-                  </div>
-                  <span className="text-[10px] text-gray-500 mt-1 uppercase">
-                    {t.type === 'user' ? 'You' : 'Gemini'} • {new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-          <div className="p-4 bg-gray-900/80 border-t border-gray-800">
-             <div className="flex items-center gap-3 text-sm text-gray-400">
-                <div className={`w-2 h-2 rounded-full ${status === ConnectionStatus.CONNECTED ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span>{status === ConnectionStatus.CONNECTED ? 'Listening to voice & screen...' : 'System offline'}</span>
-             </div>
-          </div>
-        </div>
-      </main>
+                    className={`max-w-[85%] px-4 py-3 bordered...`}
 
-      <footer className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gray-900/40 p-4 rounded-xl border border-gray-800/50 flex items-center gap-4">
-          <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <div className="text-xs">
-            <p className="font-bold text-gray-300 uppercase tracking-wide">Vision Intelligence</p>
-            <p className="text-gray-500">Gemini 2.5 Multimodal Reasoning</p>
-          </div>
-        </div>
-        <div className="bg-gray-900/40 p-4 rounded-xl border border-gray-800/50 flex items-center gap-4">
-          <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-            </svg>
-          </div>
-          <div className="text-xs">
-            <p className="font-bold text-gray-300 uppercase tracking-wide">Neural Voice Output</p>
-            <p className="text-gray-500">Low-latency Real-time Speech</p>
-          </div>
-        </div>
-        <div className="bg-gray-900/40 p-4 rounded-xl border border-gray-800/50 flex items-center gap-4">
-          <div className="p-2 bg-green-500/10 rounded-lg text-green-400">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-          </div>
-          <div className="text-xs">
-            <p className="font-bold text-gray-300 uppercase tracking-wide">Self-contained UI</p>
-            <p className="text-gray-500">Zero-Backend Architecture</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-export default App;
