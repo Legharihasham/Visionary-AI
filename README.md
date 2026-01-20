@@ -1,3 +1,4 @@
+[![License](https://img.shields.io)](https://opensource.org/licenses/Apache-2.0)
 
 # Visionary AI: Real-time Screen & Voice Assistant
 
