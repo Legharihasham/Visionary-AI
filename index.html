@@ -1,20 +1,24 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Visionary AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-</script>
-<script defer src="/_vercel/speed-insights/script.js"></script>
   <style>
     @keyframes pulse-ring {
-      0% { transform: scale(.33); opacity: 1; }
-      80%, 100% { opacity: 0; }
+      0% {
+        transform: scale(.33);
+        opacity: 1;
+      }
+
+      80%,
+      100% {
+        opacity: 0;
+      }
     }
+
     .pulse-ring::before {
       content: '';
       position: absolute;
@@ -27,7 +31,7 @@
       animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
     }
   </style>
-<script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
@@ -37,10 +41,11 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
+
 <body class="bg-gray-950 text-white min-h-screen">
   <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
