@@ -19,12 +19,14 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
   const [transcriptions, setTranscriptions] = useState<TranscriptionLine[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
 
   // Refs for audio/video stream handling
   const screenVideoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const inputAudioCtxRef = useRef<AudioContext | null>(null);
   const outputAudioCtxRef = useRef<AudioContext | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
   const sessionRef = useRef<any>(null);
   const nextStartTimeRef = useRef<number>(0);
   const activeSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
@@ -45,7 +47,25 @@ const App: React.FC = () => {
       (screenVideoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
     }
 
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(t => t.stop());
+      micStreamRef.current = null;
+    }
+
+    setIsMuted(false);
     setStatus(ConnectionStatus.DISCONNECTED);
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted(prev => {
+      const newState = !prev;
+      if (micStreamRef.current) {
+        micStreamRef.current.getAudioTracks().forEach(track => {
+          track.enabled = !newState;
+        });
+      }
+      return newState;
+    });
   }, []);
 
   const startSession = async () => {
@@ -91,6 +111,7 @@ const App: React.FC = () => {
 
             // Start streaming microphone
             navigator.mediaDevices.getUserMedia({ audio: true }).then(micStream => {
+              micStreamRef.current = micStream;
               const source = inputAudioCtxRef.current!.createMediaStreamSource(micStream);
               const processor = inputAudioCtxRef.current!.createScriptProcessor(4096, 1, 1);
 
@@ -234,6 +255,23 @@ const App: React.FC = () => {
           )}
           {status === ConnectionStatus.CONNECTED && (
             <button
+              onClick={toggleMute}
+              className={`px-4 py-3 rounded-full font-semibold transition-all shadow-lg active:scale-95 flex items-center gap-2 ${isMuted ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
+            >
+              {isMuted ? (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  <line x1="1" y1="1" x2="23" y2="23" stroke="white" strokeWidth="2" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+              )}
+            </button>
+          )}
+          {status === ConnectionStatus.CONNECTED && (
+            <button
               onClick={stopAll}
               className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-full font-semibold transition-all shadow-lg active:scale-95 flex items-center gap-2"
             >
@@ -326,8 +364,8 @@ const App: React.FC = () => {
                 >
                   <div
                     className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${t.type === 'user'
-                        ? 'bg-blue-600 text-white rounded-br-none'
-                        : 'bg-gray-800 text-gray-200 rounded-bl-none'
+                      ? 'bg-blue-600 text-white rounded-br-none'
+                      : 'bg-gray-800 text-gray-200 rounded-bl-none'
                       }`}
                   >
                     {t.text}
