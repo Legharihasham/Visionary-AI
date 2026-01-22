@@ -1,13 +1,13 @@
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
-import { ConnectionStatus, TranscriptionLine } from '../../types';
+import { ConnectionStatus, TranscriptionLine } from '../types';
 import {
     decode,
     decodeAudioData,
     createAudioBlob,
     blobToBase64
-} from '../../utils/audioUtils';
+} from '../utils/audioUtils';
 import { useNavigate } from 'react-router-dom';
 
 const SAMPLE_RATE_IN = 16000;
@@ -35,6 +35,7 @@ const Session: React.FC = () => {
     const frameIntervalRef = useRef<number | null>(null);
     const currentInputTransRef = useRef<string>('');
     const currentOutputTransRef = useRef<string>('');
+    const fullTranscriptionsRef = useRef<TranscriptionLine[]>([]);
 
     useEffect(() => {
         setIsLoaded(true);
@@ -44,7 +45,31 @@ const Session: React.FC = () => {
         transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [transcriptions]);
 
+    const saveTranscript = useCallback(async () => {
+        const transcript = fullTranscriptionsRef.current;
+        if (transcript.length === 0) return;
+
+        try {
+            console.log('Saving transcript...', transcript.length, 'entries');
+            // In a real production app, you might want to use navigator.sendBeacon or a dedicated analytics service
+            // to ensure this request completes even if the page unloads, but fetch is often sufficient for SPA navigation.
+            await fetch('/api/save-transcript', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    transcript,
+                    timestamp: Date.now()
+                })
+            });
+            console.log('Transcript saved successfully');
+        } catch (error) {
+            console.error('Failed to save transcript:', error);
+        }
+    }, []);
+
     const stopAll = useCallback(() => {
+        saveTranscript(); // Save before clearing
+
         if (frameIntervalRef.current) window.clearInterval(frameIntervalRef.current);
         if (sessionRef.current) sessionRef.current.close();
         activeSourcesRef.current.forEach(source => source.stop());
@@ -58,7 +83,19 @@ const Session: React.FC = () => {
         }
         setIsMuted(false);
         setStatus(ConnectionStatus.DISCONNECTED);
-    }, []);
+        // We don't clear fullTranscriptionsRef here immediately in case we want to show a summary, 
+        // but for a new session we should.
+        fullTranscriptionsRef.current = [];
+    }, [saveTranscript]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (sessionRef.current) {
+                stopAll();
+            }
+        };
+    }, [stopAll]);
 
     const toggleMute = useCallback(() => {
         setIsMuted(prev => {
@@ -150,11 +187,21 @@ const Session: React.FC = () => {
                         if (message.serverContent?.turnComplete) {
                             const input = currentInputTransRef.current;
                             const output = currentOutputTransRef.current;
+
+                            // Update both state and ref
                             if (input || output) {
-                                setTranscriptions(prev => [
-                                    ...prev,
+                                const newItems = [
                                     ...(input ? [{ type: 'user' as const, text: input, timestamp: Date.now() }] : []),
                                     ...(output ? [{ type: 'ai' as const, text: output, timestamp: Date.now() }] : [])
+                                ];
+
+                                // Update Ref for final saving (full history)
+                                fullTranscriptionsRef.current = [...fullTranscriptionsRef.current, ...newItems];
+
+                                // Update State for UI (limited history)
+                                setTranscriptions(prev => [
+                                    ...prev,
+                                    ...newItems
                                 ].slice(-30));
                             }
                             currentInputTransRef.current = '';
@@ -202,12 +249,11 @@ const Session: React.FC = () => {
     return (
         <div className="flex flex-col h-screen bg-void overflow-hidden">
             <SpeedInsights />
-            
+
             {/* Ambient Background */}
             <div className="fixed inset-0 pointer-events-none">
-                <div className={`absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[150px] transition-all duration-1000 ${
-                    isConnected ? 'bg-accent-cyan/[0.03]' : 'bg-accent-blue/[0.02]'
-                }`} />
+                <div className={`absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[150px] transition-all duration-1000 ${isConnected ? 'bg-accent-cyan/[0.03]' : 'bg-accent-blue/[0.02]'
+                    }`} />
                 <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-accent-violet/[0.02] blur-[120px]" />
             </div>
 
@@ -215,7 +261,7 @@ const Session: React.FC = () => {
             <header className={`relative z-20 flex justify-between items-center px-6 py-4 glass border-b border-white/5 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                 <div className="flex items-center gap-5">
                     {/* Back Button */}
-                    <button 
+                    <button
                         onClick={() => navigate('/')}
                         className="group w-10 h-10 flex items-center justify-center border border-white/10 hover:border-accent-cyan/50 hover:glow-cyan transition-all duration-300"
                     >
@@ -223,13 +269,12 @@ const Session: React.FC = () => {
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    
+
                     {/* Logo */}
                     <div className="flex items-center gap-4">
                         <div className="relative">
-                            <div className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                                isConnected ? 'bg-accent-cyan status-dot' : isConnecting ? 'bg-yellow-500 animate-pulse' : 'bg-white/20'
-                            }`} />
+                            <div className={`w-3 h-3 rounded-full transition-all duration-500 ${isConnected ? 'bg-accent-cyan status-dot' : isConnecting ? 'bg-yellow-500 animate-pulse' : 'bg-white/20'
+                                }`} />
                         </div>
                         <div>
                             <h1 className="text-lg font-semibold tracking-tight">
@@ -259,17 +304,16 @@ const Session: React.FC = () => {
                             </span>
                         </button>
                     )}
-                    
+
                     {isConnected && (
                         <div className="flex items-center gap-2">
                             {/* Mute Button */}
                             <button
                                 onClick={toggleMute}
-                                className={`group w-10 h-10 flex items-center justify-center border transition-all duration-300 ${
-                                    isMuted 
-                                        ? 'border-red-500/50 bg-red-500/10 hover:bg-red-500/20' 
-                                        : 'border-white/10 hover:border-accent-cyan/50'
-                                }`}
+                                className={`group w-10 h-10 flex items-center justify-center border transition-all duration-300 ${isMuted
+                                    ? 'border-red-500/50 bg-red-500/10 hover:bg-red-500/20'
+                                    : 'border-white/10 hover:border-accent-cyan/50'
+                                    }`}
                             >
                                 {isMuted ? (
                                     <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -281,7 +325,7 @@ const Session: React.FC = () => {
                                     </svg>
                                 )}
                             </button>
-                            
+
                             {/* End Button */}
                             <button
                                 onClick={stopAll}
@@ -296,7 +340,7 @@ const Session: React.FC = () => {
                             </button>
                         </div>
                     )}
-                    
+
                     {isConnecting && (
                         <div className="flex items-center gap-3 px-6 py-3">
                             <div className="w-4 h-4 border-2 border-accent-cyan/30 border-t-accent-cyan rounded-full animate-spin" />
@@ -321,7 +365,7 @@ const Session: React.FC = () => {
 
             {/* Main Content */}
             <main className={`relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 md:p-6 min-h-0 transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                
+
                 {/* Video Panel */}
                 <div className="lg:col-span-8 xl:col-span-9 flex flex-col min-h-0 panel rounded-lg overflow-hidden">
                     {/* Panel Header */}
@@ -336,19 +380,19 @@ const Session: React.FC = () => {
                             <span>Live</span>
                         </div>
                     </div>
-                    
+
                     {/* Video Area */}
                     <div className="flex-1 relative flex items-center justify-center bg-black/50 overflow-hidden">
                         {/* Grid Overlay */}
                         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
-                        
+
                         <video
                             ref={screenVideoRef}
                             autoPlay
                             muted
                             className={`w-full h-full object-contain transition-opacity duration-500 ${!isConnected && 'opacity-0 absolute'}`}
                         />
-                        
+
                         {!isConnected && (
                             <div className="flex flex-col items-center gap-6 text-center">
                                 <div className="relative">
@@ -365,7 +409,7 @@ const Session: React.FC = () => {
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Live Indicator */}
                         {isConnected && (
                             <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 glass-light rounded-full">
@@ -373,7 +417,7 @@ const Session: React.FC = () => {
                                 <span className="text-[10px] font-semibold uppercase tracking-widest text-white/60">Live</span>
                             </div>
                         )}
-                        
+
                         {/* Voice Indicator */}
                         {isConnected && !isMuted && (
                             <div className="absolute bottom-4 right-4">
@@ -396,7 +440,7 @@ const Session: React.FC = () => {
                         <span className="text-xs font-medium uppercase tracking-wider text-white/40">Transcript</span>
                         <span className="text-[10px] font-mono text-white/20">{transcriptions.length} msgs</span>
                     </div>
-                    
+
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
                         {transcriptions.length === 0 ? (
@@ -412,16 +456,14 @@ const Session: React.FC = () => {
                                     key={idx}
                                     className={`animate-fade-in ${t.type === 'user' ? 'pl-4' : 'pr-4'}`}
                                 >
-                                    <div className={`flex items-center gap-2 mb-1.5 text-[10px] font-mono uppercase tracking-wider ${
-                                        t.type === 'user' ? 'text-accent-blue/60 justify-end' : 'text-white/30'
-                                    }`}>
+                                    <div className={`flex items-center gap-2 mb-1.5 text-[10px] font-mono uppercase tracking-wider ${t.type === 'user' ? 'text-accent-blue/60 justify-end' : 'text-white/30'
+                                        }`}>
                                         <span>{t.type === 'user' ? 'You' : 'AI'}</span>
                                         <span className="text-white/10">•</span>
                                         <span className="text-white/20">{new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
-                                    <div className={`px-4 py-3 rounded-lg text-sm leading-relaxed ${
-                                        t.type === 'user' ? 'msg-user text-white/80' : 'msg-ai text-white/60'
-                                    }`}>
+                                    <div className={`px-4 py-3 rounded-lg text-sm leading-relaxed ${t.type === 'user' ? 'msg-user text-white/80' : 'msg-ai text-white/60'
+                                        }`}>
                                         {t.text}
                                     </div>
                                 </div>
@@ -429,7 +471,7 @@ const Session: React.FC = () => {
                         )}
                         <div ref={transcriptEndRef} />
                     </div>
-                    
+
                     {/* Footer */}
                     <div className="px-4 py-3 border-t border-white/5 flex items-center justify-between">
                         <div className="flex items-center gap-2">
