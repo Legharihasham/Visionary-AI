@@ -1,13 +1,13 @@
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
-import { ConnectionStatus, TranscriptionLine } from '../../types';
+import { ConnectionStatus, TranscriptionLine } from '../types';
 import {
     decode,
     decodeAudioData,
     createAudioBlob,
     blobToBase64
-} from '../../utils/audioUtils';
+} from '../utils/audioUtils';
 import { useNavigate } from 'react-router-dom';
 
 const SAMPLE_RATE_IN = 16000;
