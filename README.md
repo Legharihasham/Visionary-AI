@@ -1,5 +1,9 @@
 
-# Visionary AI: Real-time Screen & Voice Assistant
+# Visionary AI
+
+![Visionary AI](src/images/v-ai.png)
+
+## Real-time Screen & Voice Assistant
 
 Visionary AI is a state-of-the-art React application that enables human-like interaction with your computer screen. By combining **Gemini 2.5 Flash Native Audio** with real-time screen capture, this app can see what you see, hear what you say, and talk back to you with helpful, context-aware guidance.
 
@@ -23,17 +27,20 @@ Visionary AI is a state-of-the-art React application that enables human-like int
 After cloning the repository:
 
 1. **Install Dependencies**:
+
    ```bash
    npm install
    ```
 
 2. **Configure API Key**:
    The application expects the API key to be provided via environment variables. Create a `.env` file in the root directory:
+
    ```env
    API_KEY=your_gemini_api_key_here
    ```
 
 3. **Start the Application**:
+
    ```bash
    npm run dev
    ```
@@ -62,6 +69,5 @@ After cloning the repository:
 - **Audio Processing**: Raw PCM data (16kHz in, 24kHz out) is streamed via WebSockets using the Gemini Live protocol.
 - **Multimodal AI**: Uses `gemini-2.5-flash-native-audio-preview-12-2025` which is specifically optimized for low-latency voice and vision tasks.
 - **Mute Microphone**: Added a mute microphone button to toggle microphone input.
-
 
 ### More features coming soon
