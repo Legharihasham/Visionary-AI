@@ -4,6 +4,14 @@ export const config = {
     runtime: 'nodejs',
 };
 
+/**
+ * Handles POST requests to save a transcript as a JSON file in Vercel Blob storage.
+ *
+ * Expects the request body to be JSON containing `transcript` and an optional `timestamp`.
+ *
+ * @param request - Incoming Request whose JSON body must include `transcript` (and may include `timestamp`)
+ * @returns A Response with status 200 and the saved blob metadata as JSON on success; 400 if `transcript` is missing; 405 if the HTTP method is not POST; 500 on internal error.
+ */
 export default async function handler(request: Request) {
     if (request.method !== 'POST') {
         return new Response('Method not allowed', { status: 405 });
