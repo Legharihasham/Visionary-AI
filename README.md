@@ -1,7 +1,7 @@
 
 # Visionary AI
 
-![Visionary AI](src/images/v-ai.png)
+![Visionary AI](public/v-ai.png)
 
 ## Real-time Screen & Voice Assistant
 
