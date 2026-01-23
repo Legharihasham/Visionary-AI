@@ -56,11 +56,12 @@ const Home: React.FC = () => {
                 <div className="flex justify-between items-center mb-20">
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <div className="w-2 h-2 bg-accent-cyan rounded-full status-dot" />
+                            <div className="mt-8 w-2 h-2 bg-accent-cyan rounded-full status-dot" />
                         </div>
-                        <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/40">System Active</span>
+                        <span className="mt-8 text-[10px] font-mono uppercase tracking-[0.3em] text-white/50">System Active</span>
+
                     </div>
-                    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/20">v3.0.0</div>
+                    <div className="mt-8 text-[10px] font-mono uppercase tracking-[0.2em] text-white/20">v3.0.0</div>
                 </div>
 
                 {/* Hero Section */}
