@@ -110,6 +110,10 @@ const Session: React.FC = () => {
     }, []);
 
     const startSession = async () => {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+            alert("This project is still not supported on mobile devices and we will introduce it soon. Please use it on Windows or another computer OS browser.");
+            return;
+        }
         try {
             setStatus(ConnectionStatus.CONNECTING);
             setErrorMessage(null);
