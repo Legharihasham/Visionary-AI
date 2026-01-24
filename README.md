@@ -5,7 +5,7 @@
 
 ## Real-time Screen & Voice Assistant
 
-Visionary AI is a state-of-the-art React application that enables human-like interaction with your computer screen. By combining **Gemini 2.5 Flash Native Audio** with real-time screen capture, this app can see what you see, hear what you say, and talk back to you with helpful, context-aware guidance.
+Visionary AI is a state-of-the-art React application that enables human-like interaction with your computer screen. By combining **Gemini 2.5 Flash Native Audio** with real-time screen capture, this app can see what you see, hear what you say, and talk back to you with helpful, context-aware guidance. Enhanced UI and easy to use user experience make it perfect for accessibility, troubleshooting, and productivity.
 
 ## Key Features
 
