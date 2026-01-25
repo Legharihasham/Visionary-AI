@@ -27,3 +27,8 @@ dist-ssr
 # files for agent skills
 .gemini
 .agents
+
+BEST_PRACTICES_AUDIT.md
+FIXES_APPLIED.md
+CURSOR_SKILLS_AUDIT.md
+CURSOR_SKILLS_FIXES.md

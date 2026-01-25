@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Home: React.FC = () => {
@@ -8,8 +8,11 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         setIsLoaded(true);
+        // Use startTransition for non-urgent UI updates (rerender-transitions)
         const handleMouseMove = (e: MouseEvent) => {
-            setMousePos({ x: e.clientX, y: e.clientY });
+            startTransition(() => {
+                setMousePos({ x: e.clientX, y: e.clientY });
+            });
         };
         window.addEventListener('mousemove', handleMouseMove);
         return () => window.removeEventListener('mousemove', handleMouseMove);
@@ -112,10 +115,11 @@ const Home: React.FC = () => {
                         <button
                             onClick={() => navigate('/session')}
                             className="group relative px-12 py-5 btn-metallic corner-accent"
+                            aria-label="Start Visionary AI session - Try Now For Free"
                         >
                             <span className="relative z-10 flex items-center gap-4 text-sm font-semibold uppercase tracking-[0.2em] text-white/80 group-hover:text-accent-cyan transition-colors duration-300">
                                 Try Now For Free
-                                <svg className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <svg className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                     <path d="M5 12h14M12 5l7 7-7 7" />
                                 </svg>
                             </span>
@@ -163,8 +167,9 @@ const Home: React.FC = () => {
                                         <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#0a0a0a]">
                                             <img
                                                 src="/hasham.jpg"
-                                                alt="Muhammad Hasham Khan"
+                                                alt="Muhammad Hasham Khan - Developer of Visionary AI"
                                                 className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                                                loading="lazy"
                                             />
                                         </div>
                                     </div>

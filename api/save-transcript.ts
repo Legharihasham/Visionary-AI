@@ -5,14 +5,19 @@ export const config = {
 };
 
 export default async function handler(request: Request) {
-    // 1. Authentication Check
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || authHeader !== `Bearer ${process.env.API_SECRET_KEY}`) {
-        return new Response('Unauthorized', { status: 401 });
-    }
-
+    // Method validation
     if (request.method !== 'POST') {
         return new Response('Method not allowed', { status: 405 });
+    }
+
+    // 1. Authentication Check
+    // For production security, require API secret key authentication
+    const apiSecret = process.env.API_SECRET_KEY;
+    if (apiSecret) {
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || authHeader !== `Bearer ${apiSecret}`) {
+            return new Response('Unauthorized', { status: 401 });
+        }
     }
 
     // 2. Content-Type Validation
@@ -26,14 +31,29 @@ export default async function handler(request: Request) {
         const { transcript, timestamp } = payload;
 
         // 3. Payload Validation
-        if (!transcript || typeof transcript !== 'string') {
-            // Allow string or maybe verify structure if it's an object, but prompt said "ensuring transcript is a string/expected structure"
-            // Let's assume transcript should be a string based on "JSON.stringify(transcript)" usage in original code
-            // Wait, original code did: JSON.stringify(transcript, null, 2). If transcript is object it works.
-            // But prompt says: "ensuring transcript is a string/expected structure"
-            // I'll allow object or string but ensure it's not empty.
-            if (!transcript || (typeof transcript !== 'string' && typeof transcript !== 'object')) {
-                return new Response('Invalid transcript format', { status: 400 });
+        // Client sends transcript as an array of TranscriptionLine objects
+        if (!transcript) {
+            return new Response('Transcript is required', { status: 400 });
+        }
+
+        // Validate transcript is an array of objects with expected structure
+        if (!Array.isArray(transcript)) {
+            return new Response('Transcript must be an array', { status: 400 });
+        }
+
+        // Validate each transcript entry has required fields
+        for (const entry of transcript) {
+            if (typeof entry !== 'object' || entry === null) {
+                return new Response('Each transcript entry must be an object', { status: 400 });
+            }
+            if (entry.type !== 'user' && entry.type !== 'ai') {
+                return new Response('Transcript entry type must be "user" or "ai"', { status: 400 });
+            }
+            if (typeof entry.text !== 'string') {
+                return new Response('Transcript entry text must be a string', { status: 400 });
+            }
+            if (typeof entry.timestamp !== 'number') {
+                return new Response('Transcript entry timestamp must be a number', { status: 400 });
             }
         }
 

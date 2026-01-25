@@ -1,6 +1,4 @@
-import { SpeedInsights } from "@vercel/speed-insights/react";
-import { Analytics } from "@vercel/analytics/react";
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { ConnectionStatus, TranscriptionLine } from './types';
 import { 
@@ -11,6 +9,14 @@ import {
   blobToBase64 
 } from './utils/audioUtils';
 
+// Defer third-party libraries to load after hydration (bundle-defer-third-party)
+const SpeedInsights = lazy(() => 
+  import('@vercel/speed-insights/react').then(module => ({ default: module.SpeedInsights }))
+);
+const Analytics = lazy(() => 
+  import('@vercel/analytics/react').then(module => ({ default: module.Analytics }))
+);
+
 const SAMPLE_RATE_IN = 16000;
 const SAMPLE_RATE_OUT = 24000;
 const FRAME_RATE = 1; // 1 frame per second for UI analysis
@@ -20,6 +26,11 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
   const [transcriptions, setTranscriptions] = useState<TranscriptionLine[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
   
   // Refs for audio/video stream handling
   const screenVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -68,7 +79,13 @@ const App: React.FC = () => {
       outputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_OUT });
 
       // 3. Connect to Gemini Live
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // SECURITY WARNING: API key is exposed in client-side code
+      // In production, this should be handled via a server-side proxy
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.API_KEY;
+      if (!apiKey) {
+        throw new Error('API key is not configured. Please set VITE_GEMINI_API_KEY in your environment variables.');
+      }
+      const ai = new GoogleGenAI({ apiKey });
       const sessionPromise = ai.live.connect({
         model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         config: {
@@ -204,7 +221,11 @@ const App: React.FC = () => {
   return (
     <>
     <div className="flex flex-col h-screen max-w-7xl mx-auto p-4 md:p-8 space-y-6">
-      <Analytics />
+      {isHydrated && (
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
+      )}
       <header className="flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-xl">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -387,7 +408,11 @@ const App: React.FC = () => {
         </div>
       </footer>
     </div>
-    <SpeedInsights />
+    {isHydrated && (
+      <Suspense fallback={null}>
+        <SpeedInsights />
+      </Suspense>
+    )}
     </>
   );
 };

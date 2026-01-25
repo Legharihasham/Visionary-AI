@@ -4,7 +4,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visionary AI</title>
+  <title>Visionary AI - Real-time Screen & Voice Assistant</title>
+  <meta name="description" content="Real-time multimodal AI assistant that can see your screen and talk to you. Powered by Gemini 2.5 Flash Native Audio for natural voice-to-voice interaction.">
+  <meta name="keywords" content="AI assistant, screen reader, voice assistant, Gemini AI, accessibility, multimodal AI">
+  <meta name="author" content="Muhammad Hasham Khan">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://visionary-ai.vercel.app/">
+  <meta property="og:title" content="Visionary AI - Real-time Screen & Voice Assistant">
+  <meta property="og:description" content="Real-time multimodal AI assistant that can see your screen and talk to you. Powered by Gemini 2.5 Flash Native Audio.">
+  <meta property="og:image" content="/v-ai.png">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://visionary-ai.vercel.app/">
+  <meta property="twitter:title" content="Visionary AI - Real-time Screen & Voice Assistant">
+  <meta property="twitter:description" content="Real-time multimodal AI assistant that can see your screen and talk to you. Powered by Gemini 2.5 Flash Native Audio.">
+  <meta property="twitter:image" content="/v-ai.png">
+  
+  <!-- Theme -->
+  <meta name="theme-color" content="#030303">
+  <meta name="color-scheme" content="dark">
+  
+  <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -418,8 +441,8 @@
 </head>
 
 <body class="bg-void text-silver font-sans min-h-screen selection:bg-accent-cyan/20 selection:text-white antialiased">
-  <div class="noise"></div>
-  <div id="root"></div>
+  <div class="noise" aria-hidden="true"></div>
+  <div id="root" role="main"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
 

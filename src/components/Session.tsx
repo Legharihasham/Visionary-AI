@@ -1,5 +1,4 @@
-import { SpeedInsights } from "@vercel/speed-insights/react";
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, lazy, Suspense } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { ConnectionStatus, TranscriptionLine } from '../types';
 import {
@@ -9,6 +8,11 @@ import {
     blobToBase64
 } from '../utils/audioUtils';
 import { useNavigate } from 'react-router-dom';
+
+// Defer third-party libraries to load after hydration (bundle-defer-third-party)
+const SpeedInsights = lazy(() => 
+  import('@vercel/speed-insights/react').then(module => ({ default: module.SpeedInsights }))
+);
 
 const SAMPLE_RATE_IN = 16000;
 const SAMPLE_RATE_OUT = 24000;
@@ -51,11 +55,22 @@ const Session: React.FC = () => {
 
         try {
             console.log('Saving transcript...', transcript.length, 'entries');
-            // In a real production app, you might want to use navigator.sendBeacon or a dedicated analytics service
-            // to ensure this request completes even if the page unloads, but fetch is often sufficient for SPA navigation.
+            // Note: Using fetch for transcript saving. For production, consider using
+            // navigator.sendBeacon() if you need to ensure the request completes on page unload
+            
+            // Include Authorization header if API_SECRET_KEY is configured
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+            
+            const apiSecret = import.meta.env.VITE_API_SECRET_KEY;
+            if (apiSecret) {
+                headers['Authorization'] = `Bearer ${apiSecret}`;
+            }
+            
             await fetch('/api/save-transcript', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     transcript,
                     timestamp: Date.now()
@@ -129,7 +144,13 @@ const Session: React.FC = () => {
             inputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_IN });
             outputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_OUT });
 
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            // SECURITY WARNING: API key is exposed in client-side code
+            // In production, this should be handled via a server-side proxy
+            const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.API_KEY;
+            if (!apiKey) {
+                throw new Error('API key is not configured. Please set VITE_GEMINI_API_KEY in your environment variables.');
+            }
+            const ai = new GoogleGenAI({ apiKey });
             const sessionPromise = ai.live.connect({
                 model: 'gemini-2.5-flash-native-audio-preview-12-2025',
                 config: {
@@ -250,9 +271,19 @@ const Session: React.FC = () => {
     const isConnecting = status === ConnectionStatus.CONNECTING;
     const isDisconnected = status === ConnectionStatus.DISCONNECTED;
 
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
+
     return (
         <div className="flex flex-col h-screen bg-void overflow-hidden">
-            <SpeedInsights />
+            {isHydrated && (
+                <Suspense fallback={null}>
+                    <SpeedInsights />
+                </Suspense>
+            )}
 
             {/* Ambient Background */}
             <div className="fixed inset-0 pointer-events-none">
@@ -268,6 +299,7 @@ const Session: React.FC = () => {
                     <button
                         onClick={() => navigate('/')}
                         className="group w-10 h-10 flex items-center justify-center border border-white/10 hover:border-accent-cyan/50 hover:glow-cyan transition-all duration-300"
+                        aria-label="Navigate back to home page"
                     >
                         <svg className="w-4 h-4 text-white/50 group-hover:text-accent-cyan transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -298,9 +330,10 @@ const Session: React.FC = () => {
                         <button
                             onClick={startSession}
                             className="group relative px-8 py-3 btn-metallic overflow-hidden"
+                            aria-label="Start Visionary AI session"
                         >
                             <span className="relative z-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-white/70 group-hover:text-accent-cyan transition-colors">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                     <circle cx="12" cy="12" r="10" />
                                     <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none" />
                                 </svg>
@@ -318,6 +351,8 @@ const Session: React.FC = () => {
                                     ? 'border-red-500/50 bg-red-500/10 hover:bg-red-500/20'
                                     : 'border-white/10 hover:border-accent-cyan/50'
                                     }`}
+                                aria-label={isMuted ? "Unmute microphone" : "Mute microphone"}
+                                aria-pressed={isMuted}
                             >
                                 {isMuted ? (
                                     <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -334,6 +369,7 @@ const Session: React.FC = () => {
                             <button
                                 onClick={stopAll}
                                 className="group px-6 py-2.5 border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/50 transition-all duration-300"
+                                aria-label="End Visionary AI session"
                             >
                                 <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-red-400">
                                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -395,6 +431,7 @@ const Session: React.FC = () => {
                             autoPlay
                             muted
                             className={`w-full h-full object-contain transition-opacity duration-500 ${!isConnected && 'opacity-0 absolute'}`}
+                            aria-label="Live screen capture feed"
                         />
 
                         {!isConnected && (
