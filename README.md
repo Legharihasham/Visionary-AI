@@ -70,4 +70,4 @@ After cloning the repository:
 - **Multimodal AI**: Uses `gemini-2.5-flash-native-audio-preview-12-2025` which is specifically optimized for low-latency voice and vision tasks.
 - **Mute Microphone**: Added a mute microphone button to toggle microphone input.
 
-### More features coming soon
+### More features and improvements coming soon
