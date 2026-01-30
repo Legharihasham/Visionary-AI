@@ -214,6 +214,23 @@
     }
 
     /* Metallic Gradients */
+    @keyframes animate-gradient-x {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .animate-gradient-x {
+      background-size: 200% 200%;
+      animation: animate-gradient-x 3s ease infinite;
+    }
+
     .metallic-text {
       background: linear-gradient(135deg, #e8e8e8 0%, #a0a0a0 25%, #e8e8e8 50%, #a0a0a0 75%, #e8e8e8 100%);
       background-size: 200% 200%;
