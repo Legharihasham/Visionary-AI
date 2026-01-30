@@ -27,5 +27,3 @@ dist-ssr
 # files for agent skills
 .gemini
 .agents
-.agent
-.agent\skills
