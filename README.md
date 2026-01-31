@@ -3,7 +3,7 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1/badge)](https://bestpractices.coreinfrastructure.org/projects/1)
 
 
-
+![Visionary AI](public/v-asset.png)
 
 ## Real-time Screen & Voice Assistant
 
