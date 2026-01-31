@@ -61,3 +61,4 @@ Please follow these steps to have your contribution considered by the maintainer
 -   **TypeScript**: Please ensure all new code is strongly typed. Avoid `any` where possible.
 -   **React**: We use functional components and hooks.
 -   **Styling**: Follow the existing styling patterns.
+-   **Version Control**: Use semantic versioning for releases.
