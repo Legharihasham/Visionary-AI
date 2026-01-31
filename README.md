@@ -1,5 +1,7 @@
 
 # Visionary AI
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1/badge)](https://bestpractices.coreinfrastructure.org/projects/1)
+
 
 ![Visionary AI](public/v-ai.png)
 
