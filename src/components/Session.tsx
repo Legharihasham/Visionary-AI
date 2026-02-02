@@ -15,9 +15,19 @@ const SAMPLE_RATE_OUT = 24000;
 const FRAME_RATE = 1;
 const JPEG_QUALITY = 0.6;
 
+const VOICES = [
+    { name: 'Puck', label: 'Puck (Playful)' },
+    { name: 'Charon', label: 'Charon (Deep)' },
+    { name: 'Kore', label: 'Kore (Calm)' },
+    { name: 'Fenrir', label: 'Fenrir (Warm)' },
+    { name: 'Aoede', label: 'Aoede (Professional)' },
+    { name: 'Zephyr', label: 'Zephyr (Bright)' },
+];
+
 const Session: React.FC = () => {
     const [status, setStatus] = useState<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
     const [transcriptions, setTranscriptions] = useState<TranscriptionLine[]>([]);
+    const [selectedVoice, setSelectedVoice] = useState<string>('Zephyr');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isMuted, setIsMuted] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -135,7 +145,7 @@ const Session: React.FC = () => {
                 config: {
                     responseModalities: [Modality.AUDIO],
                     speechConfig: {
-                        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+                        voiceConfig: { prebuiltVoiceConfig: { voiceName: selectedVoice } },
                     },
                     systemInstruction: `You are a real-time visual assistant. You can see the user's screen through captured frames. You hear the user's voice. Analyze the UI, identify buttons, forms, layouts, and errors. Explain what you see and provide verbal step-by-step guidance to help the user navigate or fix issues. Be natural, concise, and helpful.`,
                     outputAudioTranscription: {},
@@ -295,18 +305,39 @@ const Session: React.FC = () => {
                 {/* Controls */}
                 <div className="flex items-center gap-3">
                     {isDisconnected && (
-                        <button
-                            onClick={startSession}
-                            className="group relative px-8 py-3 btn-metallic overflow-hidden"
-                        >
-                            <span className="relative z-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-white/70 group-hover:text-accent-cyan transition-colors">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none" />
-                                </svg>
-                                Start Session
-                            </span>
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <div className="relative group">
+                                <select
+                                    value={selectedVoice}
+                                    onChange={(e) => setSelectedVoice(e.target.value)}
+                                    className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-mono text-white/70 focus:outline-none focus:border-accent-cyan/50 hover:border-white/20 transition-all cursor-pointer min-w-[140px]"
+                                >
+                                    {VOICES.map(voice => (
+                                        <option key={voice.name} value={voice.name} className="bg-void text-white">
+                                            {voice.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <svg className="w-3 h-3 text-white/30 group-hover:text-accent-cyan transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={startSession}
+                                className="group relative px-8 py-2 btn-metallic overflow-hidden"
+                            >
+                                <span className="relative z-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-white/70 group-hover:text-accent-cyan transition-colors">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none" />
+                                    </svg>
+                                    Start Session
+                                </span>
+                            </button>
+                        </div>
                     )}
 
                     {isConnected && (
