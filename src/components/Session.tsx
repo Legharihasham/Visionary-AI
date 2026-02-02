@@ -16,12 +16,12 @@ const FRAME_RATE = 1;
 const JPEG_QUALITY = 0.6;
 
 const VOICES = [
-    { name: 'Puck', label: 'Puck (Playful)' },
-    { name: 'Charon', label: 'Charon (Deep)' },
-    { name: 'Kore', label: 'Kore (Calm)' },
-    { name: 'Fenrir', label: 'Fenrir (Warm)' },
-    { name: 'Aoede', label: 'Aoede (Professional)' },
-    { name: 'Zephyr', label: 'Zephyr (Bright)' },
+    { name: 'Puck', label: 'Puck (Playful)', gender: 'Male' },
+    { name: 'Charon', label: 'Charon (Deep)', gender: 'Male' },
+    { name: 'Kore', label: 'Kore (Calm)', gender: 'Female' },
+    { name: 'Fenrir', label: 'Fenrir (Warm)', gender: 'Male' },
+    { name: 'Aoede', label: 'Aoede (Professional)', gender: 'Female' },
+    { name: 'Zephyr', label: 'Zephyr (Bright)', gender: 'Female' },
 ];
 
 const Session: React.FC = () => {
@@ -312,11 +312,20 @@ const Session: React.FC = () => {
                                     onChange={(e) => setSelectedVoice(e.target.value)}
                                     className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-mono text-white/70 focus:outline-none focus:border-accent-cyan/50 hover:border-white/20 transition-all cursor-pointer min-w-[140px]"
                                 >
-                                    {VOICES.map(voice => (
-                                        <option key={voice.name} value={voice.name} className="bg-void text-white">
-                                            {voice.label}
-                                        </option>
-                                    ))}
+                                    <optgroup label="Female" className="bg-zinc-800 text-white font-semibold">
+                                        {VOICES.filter(v => v.gender === 'Female').map(voice => (
+                                            <option key={voice.name} value={voice.name} className="bg-void text-white font-normal">
+                                                {voice.label}
+                                            </option>
+                                        ))}
+                                    </optgroup>
+                                    <optgroup label="Male" className="bg-zinc-800 text-white font-semibold">
+                                        {VOICES.filter(v => v.gender === 'Male').map(voice => (
+                                            <option key={voice.name} value={voice.name} className="bg-void text-white font-normal">
+                                                {voice.label}
+                                            </option>
+                                        ))}
+                                    </optgroup>
                                 </select>
                                 <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <svg className="w-3 h-3 text-white/30 group-hover:text-accent-cyan transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
