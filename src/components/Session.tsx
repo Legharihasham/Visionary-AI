@@ -139,7 +139,14 @@ const Session: React.FC = () => {
             inputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_IN });
             outputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_OUT });
 
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            // Connect via our local proxy which injects the API key
+            // The middleware rewrites /google-api/* -> https://generativelanguage.googleapis.com/*
+            const ai = new GoogleGenAI({
+                apiKey: 'proxy-key', // SDK requires a value, but our middleware overrides the header
+                httpOptions: {
+                    baseUrl: `${window.location.origin}/google-api`
+                }
+            });
             const sessionPromise = ai.live.connect({
                 model: 'gemini-2.5-flash-native-audio-preview-12-2025',
                 config: {
