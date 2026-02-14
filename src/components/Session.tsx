@@ -144,7 +144,7 @@ const Session: React.FC = () => {
             const ai = new GoogleGenAI({
                 apiKey: 'proxy-key', // SDK requires a value, but our middleware overrides the header
                 httpOptions: {
-                    baseUrl: `${window.location.origin}/google-api`
+                    baseUrl: `${window.location.origin}/api/google-api`
                 }
             });
             const sessionPromise = ai.live.connect({

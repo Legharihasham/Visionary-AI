@@ -9,10 +9,10 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: '0.0.0.0',
       proxy: {
-        '/google-api': {
+        '/api/google-api': {
           target: 'https://generativelanguage.googleapis.com',
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/google-api/, ''),
+          rewrite: (path) => path.replace(/^\/api\/google-api/, ''),
           configure: (proxy, options) => {
             proxy.on('proxyReq', (proxyReq, req, res) => {
               proxyReq.setHeader('x-goog-api-key', env.GEMINI_API_KEY || '');
