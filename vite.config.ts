@@ -14,18 +14,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: '0.0.0.0',
-      proxy: {
-        '/api/google-api': {
-          target: 'https://generativelanguage.googleapis.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/google-api/, ''),
-          configure: (proxy, options) => {
-            proxy.on('proxyReq', (proxyReq, req, res) => {
-              proxyReq.setHeader('x-goog-api-key', apiKey);
-            });
-          }
-        }
-      }
+      /* proxy removed */
     },
     plugins: [react()],
     define: {

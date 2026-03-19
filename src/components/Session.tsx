@@ -139,14 +139,9 @@ const Session: React.FC = () => {
             inputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_IN });
             outputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_OUT });
 
-            // Connect via our local proxy which injects the API key
-            // The middleware rewrites /api/google-api -> https://generativelanguage.googleapis.com/*
-            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            // Connect directly to Google Gemini Live API
             const ai = new GoogleGenAI({
-                apiKey: isLocalhost ? 'proxy-key' : ((import.meta as any).env.VITE_GEMINI_API_KEY || ''), 
-                httpOptions: isLocalhost ? {
-                    baseUrl: `${window.location.origin}/api/google-api`
-                } : undefined
+                apiKey: ((import.meta as any).env.VITE_GEMINI_API_KEY || '')
             });
             const sessionPromise = ai.live.connect({
                 model: 'gemini-2.5-flash-native-audio-preview-12-2025',
