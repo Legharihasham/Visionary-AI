@@ -141,11 +141,12 @@ const Session: React.FC = () => {
 
             // Connect via our local proxy which injects the API key
             // The middleware rewrites /api/google-api -> https://generativelanguage.googleapis.com/*
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             const ai = new GoogleGenAI({
-                apiKey: 'proxy-key', // SDK requires a value, but our middleware overrides the header
-                httpOptions: {
+                apiKey: isLocalhost ? 'proxy-key' : ((import.meta as any).env.VITE_GEMINI_API_KEY || ''), 
+                httpOptions: isLocalhost ? {
                     baseUrl: `${window.location.origin}/api/google-api`
-                }
+                } : undefined
             });
             const sessionPromise = ai.live.connect({
                 model: 'gemini-2.5-flash-native-audio-preview-12-2025',
