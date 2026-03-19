@@ -139,7 +139,14 @@ const Session: React.FC = () => {
             inputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_IN });
             outputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_OUT });
 
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            // Connect via our local proxy which injects the API key
+            // The middleware rewrites /api/google-api -> https://generativelanguage.googleapis.com/*
+            const ai = new GoogleGenAI({
+                apiKey: 'proxy-key', // SDK requires a value, but our middleware overrides the header
+                httpOptions: {
+                    baseUrl: `${window.location.origin}/api/google-api`
+                }
+            });
             const sessionPromise = ai.live.connect({
                 model: 'gemini-2.5-flash-native-audio-preview-12-2025',
                 config: {
@@ -272,7 +279,7 @@ const Session: React.FC = () => {
             </div>
 
             {/* Header */}
-            <header className={`relative z-20 flex justify-between items-center px-6 py-4 glass border-b border-white/5 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+            <header className={`relative z-20 flex flex-wrap justify-between items-center gap-3 sm:gap-0 px-6 py-4 glass border-b border-white/5 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                 <div className="flex items-center gap-5">
                     {/* Back Button */}
                     <button
@@ -303,14 +310,14 @@ const Session: React.FC = () => {
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                     {isDisconnected && (
-                        <div className="flex items-center gap-3">
-                            <div className="relative group">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                            <div className="relative group w-full sm:w-auto">
                                 <select
                                     value={selectedVoice}
                                     onChange={(e) => setSelectedVoice(e.target.value)}
-                                    className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-mono text-white/70 focus:outline-none focus:border-accent-cyan/50 hover:border-white/20 transition-all cursor-pointer min-w-[140px]"
+                                    className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-mono text-white/70 focus:outline-none focus:border-accent-cyan/50 hover:border-white/20 transition-all cursor-pointer w-full sm:min-w-[140px]"
                                 >
                                     <optgroup label="Female" className="bg-zinc-800 text-white font-semibold">
                                         {VOICES.filter(v => v.gender === 'Female').map(voice => (
@@ -336,9 +343,9 @@ const Session: React.FC = () => {
 
                             <button
                                 onClick={startSession}
-                                className="group relative px-8 py-2 btn-metallic overflow-hidden"
+                                className="group relative px-8 py-2 btn-metallic overflow-hidden flex-shrink-0 w-full sm:w-auto"
                             >
-                                <span className="relative z-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-white/70 group-hover:text-accent-cyan transition-colors">
+                                <span className="relative z-10 flex items-center justify-center gap-3 text-xs font-semibold uppercase tracking-widest text-white/70 group-hover:text-accent-cyan transition-colors">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <circle cx="12" cy="12" r="10" />
                                         <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none" />
