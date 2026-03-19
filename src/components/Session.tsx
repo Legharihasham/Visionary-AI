@@ -140,7 +140,7 @@ const Session: React.FC = () => {
             outputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_OUT });
 
             // Connect via our local proxy which injects the API key
-            // The middleware rewrites /google-api/* -> https://generativelanguage.googleapis.com/*
+            // The middleware rewrites /api/google-api -> https://generativelanguage.googleapis.com/*
             const ai = new GoogleGenAI({
                 apiKey: 'proxy-key', // SDK requires a value, but our middleware overrides the header
                 httpOptions: {
