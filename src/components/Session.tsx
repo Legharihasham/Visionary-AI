@@ -279,7 +279,7 @@ const Session: React.FC = () => {
             </div>
 
             {/* Header */}
-            <header className={`relative z-20 flex justify-between items-center px-6 py-4 glass border-b border-white/5 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+            <header className={`relative z-20 flex flex-wrap justify-between items-center gap-3 sm:gap-0 px-6 py-4 glass border-b border-white/5 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                 <div className="flex items-center gap-5">
                     {/* Back Button */}
                     <button
@@ -310,9 +310,9 @@ const Session: React.FC = () => {
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                     {isDisconnected && (
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                             <div className="relative group">
                                 <select
                                     value={selectedVoice}
@@ -343,7 +343,7 @@ const Session: React.FC = () => {
 
                             <button
                                 onClick={startSession}
-                                className="group relative px-8 py-2 btn-metallic overflow-hidden"
+                                className="group relative px-8 py-2 btn-metallic overflow-hidden flex-shrink-0"
                             >
                                 <span className="relative z-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-white/70 group-hover:text-accent-cyan transition-colors">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
