@@ -139,13 +139,16 @@ const Session: React.FC = () => {
             inputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_IN });
             outputAudioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: SAMPLE_RATE_OUT });
 
-            // Connect via our local proxy which injects the API key
-            // The middleware rewrites /api/google-api -> https://generativelanguage.googleapis.com/*
+            const apiKey = ((import.meta as any).env.VITE_GEMINI_API_KEY || '');
+            if (!apiKey && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                alert("Missing VITE_GEMINI_API_KEY environment variable. Please add it to your Vercel Project Dashboard and trigger a new deployment to take effect.");
+                setStatus(ConnectionStatus.DISCONNECTED);
+                return;
+            }
+
+            // Connect directly to Google Gemini Live API
             const ai = new GoogleGenAI({
-                apiKey: 'proxy-key', // SDK requires a value, but our middleware overrides the header
-                httpOptions: {
-                    baseUrl: `${window.location.origin}/api/google-api`
-                }
+                apiKey: apiKey
             });
             const sessionPromise = ai.live.connect({
                 model: 'gemini-2.5-flash-native-audio-preview-12-2025',
