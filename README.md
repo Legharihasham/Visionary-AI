@@ -52,18 +52,20 @@ After cloning the repository:
 
 ## Usage Guide
 
-1. **Start Session**: Click the "Start Session" button in the header.
-2. **Permissions**:
+1. **Try Visionary**: Click the "Try Demo" button at the top right corner of home page.
+2. **Select Agent Voice**: Click on the voice bar and select your preferred agent voice.
+3. **Start Session**: Click the "Start Session" button in the header.
+4. **Permissions**:
    - Your browser will ask for microphone access. Allow it.
    - A screen selection dialog will appear. Choose the screen, window, or tab you want the AI to "look" at. For the best experience, select your entire monitor.
-3. **Interact**:
+5. **Interact**:
    - Simply start speaking. You can ask things like:
      - *"What is on my screen right now?"*
      - *"I'm stuck on this form, what should I do next?"*
      - *"Where is the 'Submit' button?"*
      - *"Can you explain the error message shown in the red box?"*
-4. **Guidance**: Gemini will respond verbally, describing the UI and giving you step-by-step instructions.
-5. **Stop Session**: Click "Stop Session" when finished to release the camera and microphone.
+6. **Guidance**: Gemini will respond verbally, describing the UI and giving you step-by-step instructions.
+7. **Stop Session**: Click "Stop Session" when finished to release the camera and microphone.
 
 ## Technical Notes
 
